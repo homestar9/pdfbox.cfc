@@ -5,6 +5,8 @@
  */
 component output="false" displayname="pdfbox.cfc" {
 
+    property name="javaloader" inject="loader@cbjavaloader";
+
 	/**
 	 * @hint
 	 * @src must be the absolute path to an on-disk pdf file or a file input stream
@@ -32,13 +34,20 @@ component output="false" displayname="pdfbox.cfc" {
 		 ? getFileInputStream( src )
 		 : src;
 
-		var reader    = getPDDocument();
-		variables.pdf = reader.load( fileInputStream );
-
 		variables.additionalDocuments = [];
 
 		return this;
 	}
+
+    /**
+     * onDiComplete()
+     * Fires when dependencies are loaded. 
+     * Once loaded, read the PDF file into memory.
+     */
+    function onDiComplete() {
+        var reader    = getPDDocument();
+		variables.pdf = reader.load( fileInputStream );
+    }
 
 	public string function getVersion(){
 		return createObjectHelper( "org.apache.pdfbox.util.Version" ).getVersion();
@@ -512,11 +521,7 @@ component output="false" displayname="pdfbox.cfc" {
 	private any function getPDDocument(){
 		// if a class pass is not provided, we need to override Lucee PDFBox version
 		if ( serverVersion == "Lucee" && !hasClassPath() ) {
-			return createObject(
-				"java",
-				"org.apache.pdfbox.pdmodel.PDDocument",
-				"org.apache.pdfbox.app"
-			);
+			return variables.javaloader.create( "org.apache.pdfbox.pdmodel.PDDocument" );
 		} else {
 			// just use the main helper if ACF or a class path is provided for lucee
 			return createObjectHelper( "org.apache.pdfbox.pdmodel.PDDocument" );

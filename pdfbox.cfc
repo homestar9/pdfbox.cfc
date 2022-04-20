@@ -5,7 +5,7 @@
  */
 component output="false" displayname="pdfbox.cfc" {
 
-    property name="javaloader" inject="loader@cbjavaloader";
+	property name="javaloader" inject="loader@cbjavaloader";
 
 	/**
 	 * @hint
@@ -39,15 +39,15 @@ component output="false" displayname="pdfbox.cfc" {
 		return this;
 	}
 
-    /**
-     * onDiComplete()
-     * Fires when dependencies are loaded. 
-     * Once loaded, read the PDF file into memory.
-     */
-    function onDiComplete() {
-        var reader    = getPDDocument();
+	/**
+	 * onDiComplete()
+	 * Fires when dependencies are loaded.
+	 * Once loaded, read the PDF file into memory.
+	 */
+	function onDiComplete(){
+		var reader    = getPDDocument();
 		variables.pdf = reader.load( fileInputStream );
-    }
+	}
 
 	public string function getVersion(){
 		return createObjectHelper( "org.apache.pdfbox.util.Version" ).getVersion();
@@ -590,60 +590,57 @@ component output="false" displayname="pdfbox.cfc" {
 		}
 	}
 
-    /**
-     * createImageFromPage
-     * Creates a JPG image from a pdf object page
-     * Output file name will be [originalFileName]_page_[page].jpg
-     *
-     * @page the page number to create an image from
-     * @destination path to extract the image i.e. c:\temp\ if '' then it will use the PDF file's source folder
-     * @height final destination height of the image (supports percentages)
-     * @width final destination width of the image (supports percentages)
-     */
-    public string function createImageFromPage( 
-        required numeric page=1,
-        string destination="",
-        string height = "100%",
-        string width = "100%"
-    ) {
-        
-        // get the base paths file names needed
-        var baseFile = getFileFromPath( variables.src ); // get the filename only
-        var baseFilename = reReplace( basefile, "\.[^.]*$", "" ); // remove the file extension
-        var basepath = getDirectoryFromPath( variables.src );
-        if ( !len( arguments.destination ) ) {
-            arguments.destination = basepath;
-        } 
+	/**
+	 * createImageFromPage
+	 * Creates a JPG image from a pdf object page
+	 * Output file name will be [originalFileName]_page_[page].jpg
+	 *
+	 * @page the page number to create an image from
+	 * @destination path to extract the image i.e. c:\temp\ if '' then it will use the PDF file's source folder
+	 * @height final destination height of the image (supports percentages)
+	 * @width final destination width of the image (supports percentages)
+	 */
+	public string function createImageFromPage(
+		required numeric page = 1,
+		string destination    = "",
+		string height         = "100%",
+		string width          = "100%"
+	){
+		// get the base paths file names needed
+		var baseFile     = getFileFromPath( variables.src ); // get the filename only
+		var baseFilename = reReplace( basefile, "\.[^.]*$", "" ); // remove the file extension
+		var basepath     = getDirectoryFromPath( variables.src );
+		if ( !len( arguments.destination ) ) {
+			arguments.destination = basepath;
+		}
 
-        var outputFilename = baseFilename & "_page_#arguments.page#.jpg";
-        
-        // render the PDF and get an instance of imageio
-        var pdfRenderer = javaloader.create( "org.apache.pdfbox.rendering.PDFRenderer" ).init( pdf );
-        var imageIo = createObject( "java", "javax.imageio.ImageIO" );
+		var outputFilename = baseFilename & "_page_#arguments.page#.jpg";
 
-        // render the image and safe it to disk
-        var img = pdfRenderer.renderImage( page-1 );
-        var outFile = createObject( "java", "java.io.File" ).init( arguments.destination & outputFilename );
-        imageIo.write( img, "JPEG", outFile );
+		// render the PDF and get an instance of imageio
+		var pdfRenderer = javaloader.create( "org.apache.pdfbox.rendering.PDFRenderer" ).init( pdf );
+		var imageIo     = createObject( "java", "javax.imageio.ImageIO" );
 
-        if ( 
-            arguments.width != "100%" || 
-            arguments.height != "100%"
-        ) {
+		// render the image and safe it to disk
+		var img     = pdfRenderer.renderImage( page - 1 );
+		var outFile = createObject( "java", "java.io.File" ).init( arguments.destination & outputFilename );
+		imageIo.write( img, "JPEG", outFile );
 
-            // resize the image
-            cfimage( 
-                action = "resize",
-                source = arguments.destination & outputFilename,
-                destination = arguments.destination & outputFilename,
-                overwrite = true,
-                width = arguments.width,
-                height = arguments.height
-            );
+		if (
+			arguments.width != "100%" ||
+			arguments.height != "100%"
+		) {
+			// resize the image
+			cfimage(
+				action      = "resize",
+				source      = arguments.destination & outputFilename,
+				destination = arguments.destination & outputFilename,
+				overwrite   = true,
+				width       = arguments.width,
+				height      = arguments.height
+			);
+		}
 
-        }
-
-        return arguments.destination & outputFilename;
-    }
+		return arguments.destination & outputFilename;
+	}
 
 }

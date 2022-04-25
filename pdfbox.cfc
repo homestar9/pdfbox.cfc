@@ -30,7 +30,7 @@ component output="false" displayname="pdfbox.cfc" {
 
 		variables.hasMetadata = true;
 
-		var fileInputStream = isSimpleValue( src )
+		variables.fileInputStream = isSimpleValue( src )
 		 ? getFileInputStream( src )
 		 : src;
 

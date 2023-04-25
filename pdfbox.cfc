@@ -546,7 +546,7 @@ component output="false" displayname="pdfbox.cfc" {
 				)
 			);
 		} else {
-			return createObject( "java", classname );
+			return variables.javaloader.create( "org.apache.pdfbox.pdmodel.PDDocument" );
 		}
 	}
 
